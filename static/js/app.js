@@ -184,7 +184,7 @@ els.send.addEventListener('click', async () => {
 
 els.reset.addEventListener('click', async () => {
   animationToken++; setPlaying(false); els.packetLayer.innerHTML='';
-  try { const data=await api('/api/reset',{method:'POST',body:'{}'}); selectedInspector=null; els.result.hidden=true; els.detail.innerHTML='<p class="eyebrow">INSPECTOR</p><h3>Select a device or link</h3><p>Click the topology to inspect addressing and control each serial connection.</p>'; render(data.state); }
+  try { const data=await api('/api/reset',{method:'POST',body:'{}'}); selectedInspector=null; els.result.hidden=true; els.detail.innerHTML='<p class="eyebrow">Topology inspector</p><h3>Select a device or link</h3><p>Choose an item in the diagram to inspect its addressing or configure a serial connection.</p>'; render(data.state); }
   catch(error){ showNotice(error.message); }
 });
 
