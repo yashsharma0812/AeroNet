@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="AeroNet educational airport network simulator">
+  <title>AeroNet — Resilient Airport Network Simulator</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">A</span>
+      <div><p class="eyebrow">21CSC302J · Computer Networks</p><h1>AeroNet</h1></div>
+    </div>
+    <div class="header-actions">
+      <span class="simulation-label"><i></i> Educational Simulation</span>
+      <button class="button ghost" id="resetButton">↻ Reset Demo</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero-row" aria-label="Network overview">
+      <div><p class="eyebrow accent">RESILIENT AIRPORT NETWORK SIMULATOR</p><h2>See routing decisions happen.</h2><p>Explore how addressing, OSPF-inspired path selection, PPP compatibility and HTTP delivery work together across a three-zone airport network.</p></div>
+      <div class="status-grid">
+        <article class="status-card"><span class="status-icon teal">↗</span><div><strong id="operationalCount">—</strong><small>Operational links</small></div></article>
+        <article class="status-card"><span class="status-icon teal">●</span><div><strong>Online</strong><small>Local HTTP server</small></div></article>
+        <article class="status-card wide"><span class="status-icon amber">⇢</span><div><strong id="lastRequest">No request yet</strong><small>Most recent request</small></div></article>
+      </div>
+    </section>
+
+    <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
+
+    <section class="workspace">
+      <article class="panel topology-panel">
+        <div class="panel-heading">
+          <div><p class="eyebrow">LIVE TOPOLOGY · OSPF AREA 0</p><h3>Airport network</h3></div>
+          <div class="legend"><span><i class="line up"></i>Operational</span><span><i class="line route"></i>Selected route</span><span><i class="line down"></i>Unavailable</span></div>
+        </div>
+
+        <div class="topology-wrap">
+          <svg id="topology" viewBox="0 0 920 560" role="img" aria-labelledby="topologyTitle topologyDesc">
+            <title id="topologyTitle">Interactive AeroNet airport topology</title>
+            <desc id="topologyDesc">Three router zones connected in a triangle, with four PCs and one server.</desc>
+            <defs>
+              <filter id="glow"><feGaussianBlur stdDeviation="4" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            </defs>
+            <g class="zone-bg"><rect x="20" y="35" width="270" height="485" rx="22"/><rect x="325" y="35" width="270" height="485" rx="22"/><rect x="630" y="35" width="270" height="485" rx="22"/></g>
+            <g class="zone-label"><text x="44" y="72">CHECK-IN</text><text x="349" y="72">AIRPORT SERVICES</text><text x="654" y="72">CARGO</text></g>
+            <g class="lan-links">
+              <path d="M155 405 L155 338 M95 465 L155 405 M215 465 L155 405"/><path d="M460 405 L460 338 M460 465 L460 405"/><path d="M765 405 L765 338 M705 465 L765 405 M825 465 L765 405"/>
+            </g>
+            <g id="wanLinks">
+              <path id="svg-link-checkin-services" class="wan-link" data-link="checkin-services" tabindex="0" d="M155 247 L460 135"/>
+              <path id="svg-link-services-cargo" class="wan-link" data-link="services-cargo" tabindex="0" d="M460 135 L765 247"/>
+              <path id="svg-link-cargo-checkin" class="wan-link" data-link="cargo-checkin" tabindex="0" d="M765 247 L155 247"/>
+              <g class="cost-label"><text id="cost-checkin-services" x="278" y="177">10</text><text id="cost-services-cargo" x="632" y="177">10</text><text id="cost-cargo-checkin" x="460" y="237">10</text></g>
+            </g>
+            <g id="packetLayer"></g>
+            <g class="devices">
+              <g class="device router" data-device="R-CHECKIN" tabindex="0" transform="translate(155 247)"><circle r="38"/><path d="M-17 0h34M10-7l7 7-7 7M-10-7l-7 7 7 7"/><text y="58">R-CHECKIN</text><text class="sub" y="74">Area 0 · .1</text></g>
+              <g class="device router" data-device="R-SERVICES" tabindex="0" transform="translate(460 135)"><circle r="38"/><path d="M-17 0h34M10-7l7 7-7 7M-10-7l-7 7 7 7"/><text y="58">R-SERVICES</text><text class="sub" y="74">Area 0 · .97</text></g>
+              <g class="device router" data-device="R-CARGO" tabindex="0" transform="translate(765 247)"><circle r="38"/><path d="M-17 0h34M10-7l7 7-7 7M-10-7l-7 7 7 7"/><text y="58">R-CARGO</text><text class="sub" y="74">Area 0 · .65</text></g>
+              <g class="device switch" data-device="SW-CHECKIN" tabindex="0" transform="translate(155 405)"><rect x="-32" y="-22" width="64" height="44" rx="10"/><path d="M-18 0h36M-10-6l-8 6 8 6M10-6l8 6-8 6"/><text y="42">SW-CHECKIN</text></g>
+              <g class="device switch" data-device="SW-SERVICES" tabindex="0" transform="translate(460 405)"><rect x="-32" y="-22" width="64" height="44" rx="10"/><path d="M-18 0h36M-10-6l-8 6 8 6M10-6l8 6-8 6"/><text y="42">SW-SERVICES</text></g>
+              <g class="device switch" data-device="SW-CARGO" tabindex="0" transform="translate(765 405)"><rect x="-32" y="-22" width="64" height="44" rx="10"/><path d="M-18 0h36M-10-6l-8 6 8 6M10-6l8 6-8 6"/><text y="42">SW-CARGO</text></g>
+              <g class="device endpoint" data-device="PC-CHECKIN-1" tabindex="0" transform="translate(95 465)"><rect x="-22" y="-17" width="44" height="30" rx="4"/><path d="M-12 22h24M0 13v9"/><text y="43">PC-1 · .2</text></g>
+              <g class="device endpoint" data-device="PC-CHECKIN-2" tabindex="0" transform="translate(215 465)"><rect x="-22" y="-17" width="44" height="30" rx="4"/><path d="M-12 22h24M0 13v9"/><text y="43">PC-2 · .3</text></g>
+              <g class="device server" data-device="HTTP-SERVER" tabindex="0" transform="translate(460 465)"><rect x="-25" y="-22" width="50" height="44" rx="5"/><path d="M-15-10h30M-15 0h30M-15 10h30"/><text y="44">HTTP SERVER · .98</text></g>
+              <g class="device endpoint" data-device="PC-CARGO-1" tabindex="0" transform="translate(705 465)"><rect x="-22" y="-17" width="44" height="30" rx="4"/><path d="M-12 22h24M0 13v9"/><text y="43">PC-1 · .66</text></g>
+              <g class="device endpoint" data-device="PC-CARGO-2" tabindex="0" transform="translate(825 465)"><rect x="-22" y="-17" width="44" height="30" rx="4"/><path d="M-12 22h24M0 13v9"/><text y="43">PC-2 · .67</text></g>
+            </g>
+          </svg>
+        </div>
+      </article>
+
+      <aside class="side-column">
+        <article class="panel control-panel">
+          <div class="panel-heading"><div><p class="eyebrow">SIMULATED DELIVERY</p><h3>Flight information</h3></div><span class="http-badge">HTTP</span></div>
+          <label for="sourceSelect">Source device</label>
+          <select id="sourceSelect"></select>
+          <div class="route-card">
+            <span>Current route</span><strong id="routePath">Loading…</strong><small id="routeCost"></small>
+          </div>
+          <button class="button primary" id="sendButton">Send HTTP Request <span>→</span></button>
+          <a class="button secondary" href="/flights" target="_blank" rel="noopener">Open Local Portal ↗</a>
+          <p class="fine-print">The portal uses real Flask HTTP. <strong>172.16.0.98</strong> is its simulated address; your browser does not traverse these simulated routers.</p>
+          <div id="requestResult" class="request-result" hidden></div>
+        </article>
+        <article class="panel detail-panel" id="detailPanel">
+          <p class="eyebrow">INSPECTOR</p><h3>Select a device or link</h3><p>Click the topology to inspect addressing and control each serial connection.</p>
+        </article>
+      </aside>
+    </section>
+
+    <section class="panel tabs-panel">
+      <div class="tabs" role="tablist">
+        <button role="tab" aria-selected="true" data-tab="addressing">Addressing</button>
+        <button role="tab" aria-selected="false" data-tab="routing">Routing</button>
+        <button role="tab" aria-selected="false" data-tab="ppp">PPP</button>
+        <button role="tab" aria-selected="false" data-tab="events">Event Log <span id="eventCount" class="count">0</span></button>
+      </div>
+      <div id="tabContent" class="tab-content"></div>
+    </section>
+  </main>
+  <footer><span>AeroNet · 21CSC302J</span><span>Educational model — not a production network emulator</span></footer>
+  <script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
+</body>
+</html>
+

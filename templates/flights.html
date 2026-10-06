@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AeroNet Flight Information</title><link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}"></head>
+<body class="portal-body">
+  <main class="portal">
+    <div class="portal-head"><div><p class="eyebrow">AERONET · LOCAL HTTP PORTAL</p><h1>Flight information</h1><p>Fictional demonstration data served by Flask over real HTTP.</p></div><span class="live-pill">● LIVE</span></div>
+    <div class="table-wrap"><table><thead><tr><th>Flight</th><th>Destination</th><th>Departure</th><th>Gate</th><th>Status</th></tr></thead><tbody>{% for item in flights %}<tr><td><strong>{{ item.flight }}</strong></td><td>{{ item.destination }}</td><td>{{ item.time }}</td><td>{{ item.gate }}</td><td><span class="flight-status">{{ item.status }}</span></td></tr>{% endfor %}</tbody></table></div>
+    <p class="portal-note">This page is reached through your local Flask server. It represents the simulated server at <strong>172.16.0.98</strong>, but the browser request itself does not traverse AeroNet’s simulated topology.</p>
+    <a class="button secondary" href="/">← Return to simulator</a>
+  </main>
+</body>
+</html>
